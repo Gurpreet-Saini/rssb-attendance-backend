@@ -56,45 +56,11 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      packages: read
     steps:
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: latest
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy to Railway
-        env:
-          IMAGE: ${{ steps.meta.outputs.tags }}
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-          RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
-        run: |
-          echo "Deploying $IMAGE to Railway..."
-          # Install Railway CLI
-          npm install -g @railway/cli
-          
-          # Login to Railway
-          railway login --token $RAILWAY_TOKEN
-          
-          # Set project
-          railway project $RAILWAY_PROJECT_ID
-          
-          # Set environment variables (only if not already set in Railway dashboard)
-          railway variables set DATABASE_URL="${{ secrets.DATABASE_URL }}"
-          railway variables set JWT_SECRET="${{ secrets.JWT_SECRET }}"
-          
-          # Deploy - Railway will pull from GHCR
-          railway up --serviceId $RAILWAY_SERVICE_ID
+      - uses: actions/checkout@v3
+      - run: railway up --service=${{ env.RAILWAY_SERVICE_ID }}
