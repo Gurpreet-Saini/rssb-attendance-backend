@@ -1,11 +1,10 @@
-# Multi-Center Attendance Management System
+# Multi-Center Attendance Management Backend
 
-Production-ready attendance management system with a Golang backend and React frontend for multi-center operations.
+Production-ready attendance management API built with Golang for multi-center operations.
 
 ## Stack
 
 - Backend: Go, Gin, GORM, PostgreSQL, JWT, Excelize
-- Frontend: React, Vite, TailwindCSS, Axios, TanStack Table, Recharts, Quagga2
 - DevOps: Docker, Docker Compose, Makefile, environment-based config
 
 ## Features
@@ -32,14 +31,6 @@ backend-repo/
   services/
   utils/
   main.go
-frontend-repo/
-  src/
-    components/
-    hooks/
-    layouts/
-    pages/
-    services/
-    types/
 ```
 
 ## Quick Start
@@ -50,7 +41,6 @@ frontend-repo/
 docker compose up --build
 ```
 
-Frontend: [http://localhost:3001](http://localhost:3001)  
 Backend API: [http://localhost:8081/api](http://localhost:8081/api)
 
 Default super admin credentials:
@@ -66,15 +56,6 @@ Default super admin credentials:
 cp .env.example .env
 go mod tidy
 go run main.go
-```
-
-2. Frontend
-
-```bash
-cp ../frontend-repo/.env.example ../frontend-repo/.env
-cd ../frontend-repo
-npm install
-npm run dev
 ```
 
 ## API Summary
@@ -99,16 +80,14 @@ npm run dev
 
 - SQL migrations are provided in [001_init.sql](/Users/gurpreetsaini/Documents/Playground/backend-repo/migrations/001_init.sql).
 - The backend also runs `AutoMigrate` at startup to simplify first boot in containerized environments.
-- Excel exports accept the frontend token via query parameter for direct download links.
+- Set `CORS_ALLOWED_ORIGINS` to a comma-separated list of allowed frontend origins in environments where browsers will call this API directly.
 - Operators can mark attendance and search employees, but cannot create or update employees.
 
 ## Make Targets
 
 ```bash
 make install-backend
-make install-frontend
 make build-backend
-make build-frontend
 make up
 make down
 ```

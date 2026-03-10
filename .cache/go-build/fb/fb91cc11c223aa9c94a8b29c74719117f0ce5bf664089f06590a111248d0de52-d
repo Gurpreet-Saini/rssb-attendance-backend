@@ -1,5 +1,0 @@
-./attendance_repository.go
-./audit_repository.go
-./center_repository.go
-./employee_repository.go
-./user_repository.go

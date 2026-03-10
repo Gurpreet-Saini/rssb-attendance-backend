@@ -1,6 +1,0 @@
-./attendance_controller.go
-./auth_controller.go
-./center_controller.go
-./employee_controller.go
-./report_controller.go
-./user_controller.go

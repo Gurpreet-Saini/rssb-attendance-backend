@@ -1,7 +1,0 @@
-./attendance_service.go
-./auth_service.go
-./center_service.go
-./email_service.go
-./employee_service.go
-./report_service.go
-./user_service.go

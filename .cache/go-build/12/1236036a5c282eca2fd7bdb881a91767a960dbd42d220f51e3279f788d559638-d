@@ -1,3 +1,0 @@
-./auth_middleware.go
-./rate_limit_middleware.go
-./role_middleware.go

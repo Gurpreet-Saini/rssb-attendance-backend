@@ -13,6 +13,7 @@ import (
 
 	"attendance-system/backend/models"
 	"attendance-system/backend/utils"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -29,7 +30,7 @@ type Config struct {
 	DBSSLMode            string
 	JWTSecret            string
 	TokenDuration        time.Duration
-	FrontendURL          string
+	CORSAllowedOrigins   []string
 	PasswordResetTTL     time.Duration
 	SMTPHost             string
 	SMTPPort             string
@@ -40,6 +41,7 @@ type Config struct {
 	DefaultAdminName     string
 	DefaultAdminEmail    string
 	DefaultAdminPassword string
+	FrontendURL          string
 }
 
 func Load() Config {
@@ -56,7 +58,7 @@ func Load() Config {
 		DBSSLMode:            getEnv("DB_SSLMODE", "disable"),
 		JWTSecret:            getEnv("JWT_SECRET", "change-me"),
 		TokenDuration:        time.Duration(getEnvAsInt("JWT_DURATION_HOURS", 24)) * time.Hour,
-		FrontendURL:          getEnv("FRONTEND_URL", "http://localhost:3001"),
+		CORSAllowedOrigins:   getEnvAsSlice("CORS_ALLOWED_ORIGINS"),
 		PasswordResetTTL:     time.Duration(getEnvAsInt("PASSWORD_RESET_TTL_MINUTES", 60)) * time.Minute,
 		SMTPHost:             getEnv("SMTP_HOST", ""),
 		SMTPPort:             getEnv("SMTP_PORT", "587"),
@@ -67,6 +69,7 @@ func Load() Config {
 		DefaultAdminName:     getEnv("DEFAULT_ADMIN_NAME", "Super Admin"),
 		DefaultAdminEmail:    getEnv("DEFAULT_ADMIN_EMAIL", "admin@example.com"),
 		DefaultAdminPassword: getEnv("DEFAULT_ADMIN_PASSWORD", "Admin@123"),
+		FrontendURL:          getEnv("FRONTEND_URL", "http://localhost:3000"),
 	}
 }
 
@@ -225,4 +228,21 @@ func getEnvAsInt(key string, fallback int) int {
 		return fallback
 	}
 	return intValue
+}
+
+func getEnvAsSlice(key string) []string {
+	value := getEnv(key, "")
+	if value == "" {
+		return nil
+	}
+
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, strings.TrimRight(trimmed, "/"))
+		}
+	}
+	return result
 }
