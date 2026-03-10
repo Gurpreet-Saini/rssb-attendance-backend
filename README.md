@@ -5,7 +5,7 @@ Production-ready attendance management API built with Golang for multi-center op
 ## Stack
 
 - Backend: Go, Gin, GORM, PostgreSQL, JWT, Excelize
-- DevOps: Docker, Docker Compose, Makefile, environment-based config
+- DevOps: Docker, Docker Compose, GitHub Actions, Railway, Makefile
 
 ## Features
 
@@ -16,11 +16,15 @@ Production-ready attendance management API built with Golang for multi-center op
 - Dashboard with attendance KPIs and charts
 - Excel export for attendance reports
 - Rate limiting, bcrypt hashing, and audit log persistence
+- Automated CI/CD with GitHub Actions
 
 ## Project Structure
 
 ```text
 backend-repo/
+  .github/
+    workflows/
+      ci-cd.yml       # GitHub Actions CI/CD pipeline
   config/
   controllers/
   middleware/
@@ -31,9 +35,27 @@ backend-repo/
   services/
   utils/
   main.go
+  Dockerfile
+  docker-compose.yml
 ```
 
 ## Quick Start
+
+### Local Development
+
+1. Copy environment template
+
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
+```
+
+2. Run the application
+
+```bash
+go mod tidy
+go run main.go
+```
 
 ### Docker
 
@@ -48,15 +70,43 @@ Default super admin credentials:
 - Email: `admin@example.com`
 - Password: `Admin@123`
 
-### Local Development
+## Deployment
 
-1. Backend
+### Railway (Recommended)
+
+The app is configured for automatic deployment to Railway via GitHub Actions.
+
+1. Create a Railway project
+2. Add these GitHub Secrets:
+   - `RAILWAY_TOKEN` - Railway account token
+   - `RAILWAY_PROJECT_ID` - Your project ID
+   - `RAILWAY_SERVICE_ID` - Your service ID
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `JWT_SECRET` - Secure random string
+3. Push to `main` branch - deployment starts automatically
+
+### Manual Docker Deployment
 
 ```bash
-cp .env.example .env
-go mod tidy
-go run main.go
+# Build image
+docker build -t attendance-api .
+
+# Run container
+docker run -p 8080:8080 -e DATABASE_URL="..." -e JWT_SECRET="..." attendance-api
 ```
+
+## CI/CD Pipeline
+
+The GitHub Actions workflow (`.github/workflows/ci-cd.yml`) automatically:
+
+1. **On Push to Main:**
+   - Builds Docker image
+   - Pushes to GitHub Container Registry (ghcr.io)
+   - Deploys to Railway
+
+2. **On Pull Request:**
+   - Builds Docker image for testing
+   - Does not push or deploy
 
 ## API Summary
 
@@ -76,12 +126,24 @@ go run main.go
 - `GET /api/attendance`
 - `GET /api/reports/excel`
 
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `APP_ENV` | Environment (development/production) |
+| `PORT` | Server port (default: 8080) |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret key for JWT signing |
+| `JWT_DURATION_HOURS` | Token validity in hours |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed origins |
+
 ## Notes
 
-- SQL migrations are provided in [001_init.sql](/Users/gurpreetsaini/Documents/Playground/backend-repo/migrations/001_init.sql).
+- SQL migrations are provided in `migrations/001_init.sql`.
 - The backend also runs `AutoMigrate` at startup to simplify first boot in containerized environments.
 - Set `CORS_ALLOWED_ORIGINS` to a comma-separated list of allowed frontend origins in environments where browsers will call this API directly.
 - Operators can mark attendance and search employees, but cannot create or update employees.
+- **Never commit `.env` file** - it's already in `.gitignore` to prevent accidental commits of secrets.
 
 ## Make Targets
 
